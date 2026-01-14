@@ -1,0 +1,23 @@
+[2026-01-14 02:27:27] IP: ::1 | GET / | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 
+[2026-01-14 02:27:39] IP: ::1 | GET /index.php?q=%3Cscript%3Ealert%281%29%3C%2Fscript%3E | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 
+[2026-01-14 02:27:44] IP: ::1 | GET /index.php | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 
+[2026-01-14 02:28:03] IP: ::1 | GET /tintuc.php | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 
+[2026-01-14 02:28:05] IP: ::1 | GET /menu.php | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 
+[2026-01-14 02:28:06] IP: ::1 | GET /gioithieu.php | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 
+[2026-01-14 02:28:09] IP: ::1 | GET /index.php | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 
+[2026-01-14 02:28:14] IP: ::1 | GET /login.php | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 
+[2026-01-14 02:28:26] IP: ::1 | POST /login.php | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36  | POST_DATA: {"username":"admin' or '1'='1admin","password":"123"}
+[2026-01-14 02:28:57] IP: ::1 | GET /index.php | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 
+[2026-01-14 02:29:15] IP: ::1 | GET /index.php | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 
+[2026-01-14 02:29:25] IP: ::1 | GET /login.php | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 
+[2026-01-14 02:29:30] IP: ::1 | GET /detail.php?id=2 | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 
+[2026-01-14 02:29:34] IP: ::1 | GET /cart.php | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 
+[2026-01-14 02:29:40] IP: ::1 | POST /checkout.php | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36  | POST_DATA: {"final_total":"30000"}
+[2026-01-14 02:29:42] IP: ::1 | GET /index.php | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 
+[2026-01-14 03:03:09] IP: ::1 | GET /index.php | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 
+[2026-01-14 03:03:12] IP: ::1 | GET /index.php | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 
+[2026-01-14 03:03:13] IP: ::1 | GET /gioithieu.php | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 
+[2026-01-14 03:03:19] IP: ::1 | GET /menu.php | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 
+[2026-01-14 03:03:20] IP: ::1 | GET /tintuc.php | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 
+[2026-01-14 03:03:22] IP: ::1 | GET /lienhe.php | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 
+[2026-01-14 03:03:24] IP: ::1 | GET /menu.php | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 

@@ -1,23 +1,5 @@
 <?php include "./page/header.php"; ?>
-    <nav>
-        <ul>
-            <li>
-                <a href="index.php">TRANG CHỦ</a>
-            </li>
-            <li>
-                <a href="gioithieu.php">GIỚI THIỆU</a>
-            </li>
-            <li>
-                <a href="menu.php">MENU</a>
-            </li>
-            <li>
-                <a href="">TIN TỨC</a>
-            </li>
-            <li>
-                <a href="lienhe.php">LIÊN HỆ</a>
-            </li>
-        </ul>
-    </nav>
+   
     <main>
         <section class="contact-image"></section>
         <section class="address-contact">

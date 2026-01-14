@@ -1,327 +1,142 @@
-<?php include "./page/header.php"; ?>
-    <nav>
-        <ul>
-            <li>
-                <a href="index.php">TRANG CHỦ</a>
-            </li>
-            <li>
-                <a href="gioithieu.php">GIỚI THIỆU</a>
-            </li>
-            <li>
-                <a href="menu.php">MENU</a>
-            </li>
-            <li>
-                <a href="">TIN TỨC</a>
-            </li>
-            <li>
-                <a href="lienhe.php">LIÊN HỆ</a>
-            </li>
-        </ul>
-    </nav>
+<?php 
+include "./page/header.php"; 
+require_once "./func/database.php"; 
+
+// Lấy từ khóa tìm kiếm từ URL
+$keyword = isset($_GET['q']) ? $_GET['q'] : "";
+
+// Gọi hàm lấy sản phẩm (đã viết ở các bước trước)
+// Lưu ý: Hàm này trong database.php cũng đang dính SQL Injection nếu bạn chưa sửa
+$products = getAllProducts($keyword); 
+
+// Các hàm lấy sản phẩm phụ
+$newest_products = getNewestProducts();
+$best_selling_products = getBestSellingProducts();
+$top_rated_products = getTopRatedProducts();
+?>
 
     <main>
+        <?php if($keyword): ?>
+            <div style="text-align: center; margin-top: 20px; color: #333;">
+                <h3>Kết quả tìm kiếm cho: 
+                    <span style="color: red; font-weight: bold;">
+                        <?php echo $keyword; ?> 
+                    </span>
+                </h3>
+            </div>
+        <?php endif; ?>
         <section class="title">
             <b></b>
-            <h3>Trà Sữa</h3>
+            <h3>DANH SÁCH SẢN PHẨM</h3>
             <b></b>
         </section>
+        
         <section class="content">
-            <section class="product">
-                <div class="hover-image">
-                    <img src="img/aff79778ab172926274455f4c41ecd12-400x400.jpg" alt="">
-                    <div class="hover-product">
-                        <h3>QUICK VIEW</h3>
+            <?php if(count($products) > 0): ?>
+                <?php foreach ($products as $item): ?>
+                <section class="product">
+                    <div class="hover-image">
+                        <a href="detail.php?id=<?php echo $item['id']; ?>">
+                            <img src="<?php echo $item['image']; ?>" alt="<?php echo $item['name']; ?>">
+                        </a>
+                        <div class="hover-product">
+                            <a href="detail.php?id=<?php echo $item['id']; ?>" style="text-decoration: none; color: white;">
+                                <h3>XEM NGAY</h3>
+                            </a>
+                        </div>
                     </div>
-                </div>
-                <p>Trà Sữa</p>
-                <h6>Super Sundae Trân Châu Đường Đen</h6>
-                <strong>25.000đ</strong>
-            </section>
-
-            <section class="product">
-                <div class="hover-image">
-                    <img src="img/download-1-300x300.jpg" alt="">
-                    <div class="hover-product">
-                        <h3>QUICK VIEW</h3>
-                    </div>
-                </div>
-                <p>Trà Sữa</p>
-                <h6>Super Sundae Trân Châu Đường Đen</h6>
-                <strong>25.000đ</strong>
-            </section>
-            <section class="product">
-                <div class="hover-image">
-                    <img src="img/menueditor_item_20b571169f7541b5b472409c2a943fbf_1624625080508277340-400x400.jpg"
-                        alt="">
-                    <div class="hover-product">
-                        <h3>QUICK VIEW</h3>
-                    </div>
-                </div>
-                <p>Trà Sữa</p>
-                <h6>Super Sundae Trân Châu Đường Đen</h6>
-                <strong>25.000đ</strong>
-            </section>
-            <section class="product">
-                <div class="hover-image">
-                    <img src="img/menueditor_item_420928705e514408ab8a4a5daee39b02_1647417363547472080-400x400.jpg"
-                        alt="">
-                    <div class="hover-product">
-                        <h3>QUICK VIEW</h3>
-                    </div>
-                </div>
-                <p>Trà Sữa</p>
-                <h6>Super Sundae Trân Châu Đường Đen</h6>
-                <strong>25.000đ</strong>
-            </section>
+                    <p>Mixue</p>
+                    <h6>
+                        <a href="detail.php?id=<?php echo $item['id']; ?>" style="text-decoration: none; color: black;">
+                            <?php echo $item['name']; ?>
+                        </a>
+                    </h6>
+                    <strong><?php echo formatPrice($item['price']); ?></strong>
+                </section>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p style="width: 100%; text-align: center;">Không tìm thấy sản phẩm nào.</p>
+            <?php endif; ?>
         </section>
+
         <section class="title">
             <b></b>
-            <h3>Trà Sữa</h3>
+            <h3>SẢN PHẨM NỔI BẬT</h3>
             <b></b>
         </section>
-        <section class="content">
-            <section class="product">
-                <div class="hover-image">
-                    <img src="img/menueditor_item_49f7d2e096a7428ba42eac14f064e7d6_1647418765145013931-400x400.jpg"
-                        alt="">
-                    <div class="hover-product">
-                        <h3>QUICK VIEW</h3>
-                    </div>
-                </div>
-                <p>TRÀ HOA QUẢ</p>
-                <h6>Super Sundae Trân Châu Đường Đen</h6>
-                <strong>25.000đ</strong>
-            </section>
-
-            <section class="product">
-                <div class="hover-image">
-                    <img src="img/menueditor_item_4cd7495c80c8401590c56ca578f63c62_1647418690021239999-1-400x400.jpg"
-                        alt="">
-                    <div class="hover-product">
-                        <h3>QUICK VIEW</h3>
-                    </div>
-                </div>
-                <p>Trà Sữa</p>
-                <h6>Super Sundae Trân Châu Đường Đen</h6>
-                <strong>25.000đ</strong>
-            </section>
-            <section class="product">
-                <div class="hover-image">
-                    <img src="img/menueditor_item_5c69b9691a934d89bd21120fe751a1b2_1641448384783928664-400x400.jpg"
-                        alt="">
-                    <div class="hover-product">
-                        <h3>QUICK VIEW</h3>
-                    </div>
-                </div>
-                <p>Trà Sữa</p>
-                <h6>Super Sundae Trân Châu Đường Đen</h6>
-                <strong>25.000đ</strong>
-            </section>
-            <section class="product">
-                <div class="hover-image">
-                    <img src="img/menueditor_item_7f67ac47156b480a828c0cfc262761a8_1647418722959334541-400x400.jpg"
-                        alt="">
-                    <div class="hover-product">
-                        <h3>QUICK VIEW</h3>
-                    </div>
-                </div>
-                <p>Trà Sữa</p>
-                <h6>Super Sundae Trân Châu Đường Đen</h6>
-                <strong>25.000đ</strong>
-            </section>
-        </section>
-        <section class="title">
-            <b></b>
-            <h3>Trà Sữa</h3>
-            <b></b>
-        </section>
-        <section class="content">
-            <section class="product">
-                <div class="hover-image">
-                    <img src="img/z4121164685666_9f97c4bc3f39e4c6447f4d143872c221-e1676795579313-300x300.jpg" alt="">
-                    <div class="hover-product">
-                        <h3>QUICK VIEW</h3>
-                    </div>
-                </div>
-                <p>Trà Sữa</p>
-                <h6>Super Sundae Trân Châu Đường Đen</h6>
-                <strong>25.000đ</strong>
-            </section>
-
-            <section class="product">
-                <div class="hover-image">
-                    <img src="img/menueditor_item_a97d20eff6aa47c68114eb7cce7d9877_1624626020761289741-400x400.jpg"
-                        alt="">
-                    <div class="hover-product">
-                        <h3>QUICK VIEW</h3>
-                    </div>
-                </div>
-                <p>Trà Sữa</p>
-                <h6>Super Sundae Trân Châu Đường Đen</h6>
-                <strong>25.000đ</strong>
-            </section>
-            <section class="product">
-                <div class="hover-image">
-                    <img src="img/menueditor_item_e2ce187ed9494a4d8988b46c7406d5dc_1640926512896379795-400x400.jpg"
-                        alt="">
-                    <div class="hover-product">
-                        <h3>QUICK VIEW</h3>
-                    </div>
-                </div>
-                <p>Trà Sữa</p>
-                <h6>Super Sundae Trân Châu Đường Đen</h6>
-                <strong>25.000đ</strong>
-            </section>
-            <section class="product">
-                <div class="hover-image">
-                    <img src="img/menueditor_item_bb6e2ca033934d12a62abfaa6398b18f_1641370916648961240-400x400.jpg"
-                        alt="">
-                    <div class="hover-product">
-                        <h3>QUICK VIEW</h3>
-                    </div>
-                </div>
-                <p>Trà Sữa</p>
-                <h6>Super Sundae Trân Châu Đường Đen</h6>
-                <strong>25.000đ</strong>
-            </section>
-        </section>
-        <section class="title">
-            <b></b>
-            <h3>CÁC SẢN PHẨM CỦA CHÚNG TÔI</h3>
-            <b></b>
-        </section>
-        <section class="content2">
-            <section class="product" style="height: 460px;">
-                <div class="image">
-                    <img src="img/z4121164685666_9f97c4bc3f39e4c6447f4d143872c221-e1676795579313-300x300.jpg" alt="">
-                </div>
-                <div class="box-text">
-                    <strong>Trà Sữa</strong>
-                    <p>10 sản phẩm</p>
-                </div>
-            </section>
-
-            <section class="product" style="height: 460px;">
-                <div class="image">
-                    <img src="img/menueditor_item_a97d20eff6aa47c68114eb7cce7d9877_1624626020761289741-400x400.jpg"
-                        alt="">
-                </div>
-                <div class="box-text">
-                    <strong>Trà Sữa</strong>
-                    <p>12 sản phẩm</p>
-                </div>
-            </section>
-            <section class="product" style="height: 460px;">
-                <div class="image">
-                    <img src="img/menueditor_item_e2ce187ed9494a4d8988b46c7406d5dc_1640926512896379795-400x400.jpg"
-                        alt="">
-                </div>
-                <div class="box-text">
-                    <strong>Trà Sữa</strong>
-                    <p>7 sản phẩm</p>
-                </div>
-            </section>
-        </section>
+        
         <section class="product-big">
-            <section class="intro-product">
+             <section class="intro-product">
                 <p>MỚI NHẤT</p>
+                <?php foreach ($newest_products as $item): ?>
                 <section class="intro-product-sub">
                     <div class="describe">
-                        <img src="img/menueditor_item_20b571169f7541b5b472409c2a943fbf_1624625080508277340-400x400.jpg"
-                            alt="">
+                        <a href="detail.php?id=<?php echo $item['id']; ?>">
+                            <img src="<?php echo $item['image']; ?>" alt="">
+                        </a>
                         <div class="describe-sub">
-                            <p>Trà Sữa Thạch Dừa</p>
-                            <strong>25.000₫</strong>
+                            <a href="detail.php?id=<?php echo $item['id']; ?>" style="text-decoration: none; color: inherit;">
+                                <p><?php echo $item['name']; ?></p>
+                            </a>
+                            <strong><?php echo formatPrice($item['price']); ?></strong>
                         </div>
                     </div>
                     <hr>
                 </section>
-                <section class="intro-product-sub">
-                    <div class="describe">
-                        <img src="img/trasua2.jpg" alt="">
-                        <div class="describe-sub">
-                            <p>Trà Sữa 2J</p>
-                            <strong>25.000₫</strong>
-                        </div>
-                    </div>
-                    <hr>
-                </section>
-                <section class="intro-product-sub">
-                    <div class="describe">
-                        <img src="img/trasua3.jpg" alt="">
-                        <div class="describe-sub">
-                            <p>Trà Sữa 3Q</p>
-                            <strong>25.000₫</strong>
-                        </div>
-                    </div>
-                </section>
+                <?php endforeach; ?>
             </section>
-            <section class="intro-product">
-                <p>BÁN CHẠY NHẤT</p>
-                <section class="intro-product-sub">
-                    <div class="describe">
-                        <img src="img/trasua4.jpg" alt="">
-                        <div class="describe-sub">
-                            <p>Trà Sữa Bá Vương </p>
-                            <strong>30.000₫</strong>
-                        </div>
-                    </div>
-                    <hr>
-                </section>
-                <section class="intro-product-sub">
-                    <div class="describe">
-                        <img src="img/5.jpg" alt="">
-                        <div class="describe-sub">
-                            <p>Trà Sữa Thạch Dừa</p>
-                            <strong>25.000₫</strong>
-                        </div>
-                    </div>
-                    <hr>
-                </section>
-                <section class="intro-product-sub">
-                    <div class="describe">
-                        <img src="img/6.jpg" alt="">
-                        <div class="describe-sub">
-                            <p>Trà Sữa Thạch Dừa</p>
-                            <strong>25.000₫</strong>
-                        </div>
-                    </div>
-                </section>
+            
             </section>
-            <section class="intro-product">
-                <p>XẾP HẠNG HÀNG ĐẦU</p>
-                <section class="intro-product-sub">
-                    <div class="describe">
-                        <img src="img/7.jpg" alt="">
-                        <div class="describe-sub">
-                            <p>Trà Sữa Thạch Dừa</p>
-                            <strong>25.000₫</strong>
-                        </div>
-                    </div>
-                    <hr>
-                </section>
-                <section class="intro-product-sub">
-                    <div class="describe">
-                        <img src="img/8.jpg" alt="">
-                        <div class="describe-sub">
-                            <p>Trà Sữa Thạch Dừa</p>
-                            <strong>25.000₫</strong>
-                        </div>
-                    </div>
-                    <hr>
-                </section>
-                <section class="intro-product-sub">
-                    <div class="describe">
-                        <img src="img/9.jpg" alt="">
-                        <div class="describe-sub">
-                            <p>Trà Sữa Thạch Dừa</p>
-                            <strong>25.000₫</strong>
-                        </div>
-                    </div>
-                </section>
-            </section>
-        </section>
+
     </main>
 
+<?php
+    // Xử lý khi người dùng gửi bình luận
+    if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['comment_content'])) {
+        $cmt_content = $_POST['comment_content'];
+        
+        // Nếu đã đăng nhập thì lấy tên user, chưa thì lấy tên "Khách ẩn danh"
+        $cmt_user = isset($_SESSION['username']) ? $_SESSION['username'] : "Khách ẩn danh";
+        
+        if(!empty($cmt_content)){
+            addComment($cmt_user, $cmt_content);
+            echo "<script>window.location.href='index.php';</script>"; // Refresh để hiện comment mới
+        }
+    }
 
-    <?php include "./page/footer.php"; ?>
+    // Lấy danh sách comment
+    $list_comments = getComments();
+    ?>
+
+    <section class="comment-section">
+        <div class="comment-container">
+            <h3 class="comment-title">ĐÁNH GIÁ TỪ KHÁCH HÀNG</h3>
+            
+            <div class="comment-form">
+                <form action="index.php" method="POST">
+                    <textarea name="comment_content" placeholder="Bạn nghĩ gì về đồ uống của chúng tôi?" required></textarea>
+                    <button type="submit">GỬI ĐÁNH GIÁ</button>
+                </form>
+            </div>
+
+            <div class="comment-list">
+                <?php foreach ($list_comments as $cmt): ?>
+                <div class="comment-item">
+                    <div class="cmt-avatar">
+                        <img src="img/download.jfif" alt="User">
+                    </div>
+                    <div class="cmt-body">
+                        <strong><?php echo $cmt['username']; ?></strong>
+                        <span class="cmt-time"><?php echo date("d/m/Y H:i", strtotime($cmt['created_at'])); ?></span>
+                        
+                        <p class="cmt-text">
+                            <?php echo $cmt['content']; ?>
+                        </p>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+
+<?php include "./page/footer.php"; ?>

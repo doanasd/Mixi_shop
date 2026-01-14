@@ -1,108 +1,102 @@
-<?php session_start();
-include "./func/database.php";
+<?php 
+// Header đã có session_start()
+include "./page/header.php";
+require_once "./func/database.php";
 
-if (!isset($_GET['user'])) {
-    $name = $_SESSION['username'];
-    $row = profile($name);
-} else {
+// Kiểm tra đăng nhập
+if (!isset($_SESSION['username'])) {
+    echo "<script>window.location.href='login.php';</script>";
+    exit;
+}
+
+// Lấy thông tin user
+// Nếu có tham số GET 'user' (IDOR vulnerability potential) thì lấy theo đó, nếu không lấy của chính mình
+if (isset($_GET['user'])) {
     $name = $_GET['user'];
+    $row = profile($name); // Cần đảm bảo hàm profile() trong database.php lấy theo username
+} else {
+    $name = $_SESSION['username'];
     $row = profile($name);
 }
 
+// Xử lý ảnh đại diện mặc định nếu chưa có
+$avatar_path = !empty($row['avatars']) ? "./uploads/" . $row['avatars'] : "img/download.jfif";
 ?>
-<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<!------ Include the above in your HEAD tag ---------->
 
-<head>
-    <title>Profile</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-</head>
-
-
-<hr>
-<div class="container bootstrap snippet">
-    <div class="row">
-        <div class="col-sm-10">
-            <h1><?php echo $row['username']; ?></h1>
-        </div>
-        <div class="col-sm-2"><a href="" class="pull-right"><img title="profile image" class="img-circle img-responsive" src="http://www.gravatar.com/avatar/28fd20ccec6865e2d5f0e1f4446eb7bf?s=100"></a></div>
-    </div>
-    <div class="row">
-        <div class="col-sm-3"><!--left col-->
-
-
-            <div class="text-center">
-                <img src="./uploads/<?php echo $row['avatars']; ?>" class="avatar img-circle img-thumbnail" alt="avatar">
-                <h6>Upload a different photo...</h6>
-                <form action="./func/upload.php" method="post" enctype="multipart/form-data">
-                    <input type="file" class="text-center center-block file-upload" name="fileupload">
-                    <button type="submit" class="btn btn-primary">Upload</button>
-                </form>
+<main style="padding: 50px 0;">
+    <div style="width: 90%; max-width: 1000px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.1); display: flex; gap: 50px;">
+        
+        <div style="width: 30%; text-align: center;">
+            <div style="width: 200px; height: 200px; margin: 0 auto 20px; overflow: hidden; border-radius: 50%; border: 5px solid #eee;">
+                <img src="<?php echo $avatar_path; ?>" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
             </div>
-            </hr><br>
-        </div><!--/col-3-->
-        <div class="col-sm-9">
-            <div class="tab-content">
-                <div class="tab-pane active" id="home">
-                    <hr>
-                    <form class="form" action="./admin/update.php" method="post" id="registrationForm">
-                        <div class="form-group">
+            
+            <h2 style="margin-bottom: 20px; color: #BD0000;"><?php echo $row['username']; ?></h2>
 
-                            <div class="col-xs-6">
-                                <label for="phone">
-                                    <h4>Phone</h4>
-                                </label>
-                                <input type="text" class="form-control" name="phone" id="phone" placeholder="enter phone" title="enter your phone number if any." value="<?php echo $row['phone'] ?>">
-                            </div>
-                        </div>
-                        <div class="form-group">
+            <form action="./func/upload.php" method="post" enctype="multipart/form-data" style="background: #f9f9f9; padding: 15px; border-radius: 5px;">
+                <label style="display: block; margin-bottom: 10px; font-weight: bold; color: #555;">Đổi ảnh đại diện:</label>
+                <input type="file" name="fileupload" style="width: 100%; margin-bottom: 10px; font-size: 13px;">
+                <button type="submit" style="background: #BD0000; color: white; border: none; padding: 8px 15px; border-radius: 3px; cursor: pointer; width: 100%;">
+                    <i class="fa-solid fa-upload"></i> Tải lên
+                </button>
+            </form>
+        </div>
 
-                            <div class="col-xs-6">
-                                <label for="email">
-                                    <h4>Email</h4>
-                                </label>
-                                <input type="email" class="form-control" name="email" id="email" placeholder="you@email.com" title="enter your email." value="<?php echo $row['email'] ?>">
-                            </div>
-                        </div>
-                        <div class="form-group">
+        <div style="flex: 1;">
+            <h3 style="border-bottom: 2px solid #BD0000; padding-bottom: 10px; margin-bottom: 25px; color: #333;">Thông tin cá nhân</h3>
+            
+            <form action="./admin/update.php" method="post">
+                <input type="hidden" name="username" value="<?php echo $row['username']; ?>">
 
-                            <div class="col-xs-6">
-                                <label for="email">
-                                    <h4>Location</h4>
-                                </label>
-                                <input type class="form-control" name="location" id="location" placeholder="somewhere" title="enter a location" value="<?php echo $row['location'] ?>">
-                            </div>
-                        </div>
-                        <div class="form-group">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Họ và tên:</label>
+                    <input type="text" name="fullname" value="<?php echo $row['fullname']; ?>" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
 
-                            <div class="col-xs-6">
-                                <label for="password">
-                                    <h4>Full Name</h4>
-                                </label>
-                                <input class="form-control" name="fullname" id="password" placeholder="fullname" title="enter your full name." value="<?php echo $row['fullname'] ?>">
-                            </div>
-                        </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Số điện thoại:</label>
+                    <input type="text" name="phone" value="<?php echo $row['phone']; ?>" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
 
-                        <div class="form-group">
-                            <div class="col-xs-12">
-                                <br>
-                                <button class="btn btn-lg btn-success" type="submit"><i class="glyphicon glyphicon-ok-sign"></i> Save</button>
-                                <button class="btn btn-lg btn-yellow"><a href="<?php if ($_SESSION['role'] == 'admin')  echo './admin/index.php';
-                                                                                else echo 'index.php'; ?>"><i class="glyphicon "></i> Return</a></button>
-                                <button class="btn btn-lg"><a href="logout.php"><i class="glyphicon glyphicon-repeat"></i> Log Out</a></button>
-                            </div>
-                        </div>
-                    </form>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Email:</label>
+                    <input type="email" name="email" value="<?php echo $row['email']; ?>" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
 
-                </div><!--/tab-pane-->
-            </div><!--/tab-pane-->
-        </div><!--/tab-content-->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Địa chỉ:</label>
+                    <input type="text" name="location" value="<?php echo $row['location']; ?>" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
 
-    </div><!--/col-9-->
-</div><!--/row-->
+                <div style="margin-top: 30px; display: flex; gap: 15px;">
+                    <button type="submit" style="background: #28a745; color: white; border: none; padding: 12px 30px; border-radius: 5px; font-weight: bold; cursor: pointer;">
+                        <i class="fa-solid fa-check"></i> Lưu thay đổi
+                    </button>
+                    
+                    <a href="logout.php" style="background: #6c757d; color: white; padding: 12px 30px; border-radius: 5px; font-weight: bold; text-decoration: none;">
+                        <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+                    </a>
+                    
+                    <?php if($_SESSION['role'] == 'admin'): ?>
+                    <a href="./admin/index.php" style="background: #007bff; color: white; padding: 12px 30px; border-radius: 5px; font-weight: bold; text-decoration: none;">
+                        <i class="fa-solid fa-gear"></i> Trang quản trị
+                    </a>
+                    <?php endif; ?>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<style>
+    @media (max-width: 768px) {
+        main > div {
+            flex-direction: column;
+        }
+        main > div > div {
+            width: 100% !important;
+        }
+    }
+</style>
+
+<?php include "./page/footer.php"; ?>
