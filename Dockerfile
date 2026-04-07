@@ -6,8 +6,9 @@ RUN docker-php-ext-install mysqli pdo pdo_mysql
 # Copy source code vào container
 COPY src/ /var/www/html/
 
-# Tạo thư mục uploads (nếu chưa có) và phân quyền cho web server
+# Tạo thư mục uploads, TẠO SẴN file log honeypot và cấp quyền cho www-data
 RUN mkdir -p /var/www/html/uploads && \
-    chown -R www-data:www-data /var/www/html/uploads
+    touch /var/www/honeypot_access.log && \
+    chown -R www-data:www-data /var/www/html/uploads /var/www/honeypot_access.log
 
 EXPOSE 80
