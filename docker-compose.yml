@@ -1,30 +1,28 @@
-version: "3" #docker version
+version: '3.8'
 services:
   db:
     image: mysql:8.0
-    container_name: DB
-    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8 --collation-server=utf8_unicode_ci
+    container_name: mixi_db
+    restart: always
     environment:
-      - MYSQL_DATABASE=mixue
-      - MYSQL_USER=viet
-      - MYSQL_ROOT_PASSWORD=123asd
-      - MYSQL_PASSWORD=123asd321
-      - MYSQL_ALLOW_EMPTY_PASSWORD=0
+      MYSQL_DATABASE: mixi_shop
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD} # Sử dụng biến môi trường từ Jenkins
     volumes:
-      - "./DB:/docker-entrypoint-initdb.d" # this is database created on when we run
+      - [cite_start]./DB/mixi_shop.sql:/docker-entrypoint-initdb.d/mixi_shop.sql [cite: 1]
+    networks:
+      - mixi_network
+
   web:
-    container_name: WEB
-    build:
-      context: ./src
-      dockerfile: Dockerfile
-    volumes:
-      - "./src/WEB:/var/www/html"
+    build: .
+    container_name: mixi_app
+    restart: always
     ports:
-      - 80:80
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin:5.2.1
-    container_name: PHPMYADMIN_Web
-    ports:
-      - 81:80
-    environment:
-      - PMA_HOST=db
+      - "8080:80"
+    depends_on:
+      - db
+    networks:
+      - mixi_network
+
+networks:
+  mixi_network:
+    driver: bridge
