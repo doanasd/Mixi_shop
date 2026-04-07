@@ -139,7 +139,14 @@ INSERT INTO `products` (`id`, `name`, `price`, `description`, `image`, `category
 (2, 'Trà Sữa Bá Vương', 30000, 'Trà sữa đậm vị với đầy đủ topping trân châu, thạch dừa.', 'img/trasua4.jpg', 1),
 (3, 'Trà Hoa Quả Nhiệt Đới', 25000, 'Giải nhiệt mùa hè với hương vị hoa quả tươi mát.', 'img/menueditor_item_49f7d2e096a7428ba42eac14f064e7d6_1647418765145013931-400x400.jpg', 2),
 (4, 'Trà Sữa 3Q', 25000, 'Trà sữa truyền thống kết hợp trân châu 3Q giòn dai.', 'img/trasua3.jpg', 1),
-(5, 'Kem Dâu Tây', 15000, 'Vị kem dâu ngọt ngào, mát lạnh.', 'img/menueditor_item_20b571169f7541b5b472409c2a943fbf_1624625080508277340-400x400.jpg', 3);
+(5, 'Kem Dâu Tây', 15000, 'Vị kem dâu ngọt ngào, mát lạnh.', 'img/menueditor_item_20b571169f7541b5b472409c2a943fbf_1624625080508277340-400x400.jpg', 3),
+(6, 'Hồng Trà Kem', 20000, 'Hồng trà thơm đậm vị kết hợp kem tươi mát lạnh.', 'img/Hong-Tra-Kem-Mixue.jpg', 1),
+(7, 'Super Sundae Dâu Tây', 25000, 'Kem sundae vị dâu tây ngọt ngào.', 'img/Super-Sundae-Dau-Tay.jpg', 3),
+(8, 'Super Sundae Socola', 25000, 'Kem sundae sốt socola đậm đà.', 'img/Super-Sundae-Socola.jpg', 3),
+(9, 'Trà Đào Bốn Mùa', 25000, 'Trà đào tươi mát với miếng đào giòn.', 'img/Tra-Dao-Bon-Mua-800x800.jpg', 2),
+(10, 'Trà Sữa Dương Chi Cam Lộ', 30000, 'Hương vị xoài, bưởi và cốt dừa béo ngậy.', 'img/Tra-sua-Duong-Chi-Cam-Lo-Mixue-300x300.jpg', 1),
+(11, 'Kem Chocolate Sundae', 25000, 'Vị kem chocolate truyền thống.', 'img/Kem-Chocolate-Sundae-Mixue-Moi-300x300.jpg', 3),
+(12, 'Mixue Ice Cream', 10000, 'Kem ốc quế huyền thoại của Mixue.', 'img/MIXUE-Ice-Cream.jpg', 3);
 
 -- --------------------------------------------------------
 
