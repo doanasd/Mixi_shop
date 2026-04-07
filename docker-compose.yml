@@ -6,14 +6,15 @@ services:
     restart: always
     environment:
       MYSQL_DATABASE: mixi_shop
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD} # Lấy mật khẩu từ file Jenkinsfile
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
     volumes:
       - ./DB/mixi_shop.sql:/docker-entrypoint-initdb.d/mixi_shop.sql
     networks:
       - mixi_network
 
   web:
-    build: .
+    # XÓA dòng: build: .
+    image: doanasd/mixi_shop:latest # THÊM dòng này để gọi thẳng Image từ Docker Hub
     container_name: mixi_app
     restart: always
     ports:
@@ -21,7 +22,7 @@ services:
     depends_on:
       - db
     environment:
-      - DB_PASSWORD=${DB_PASSWORD} # Truyền mật khẩu vào container Web cho mã nguồn PHP
+      - DB_PASSWORD=${DB_PASSWORD}
     networks:
       - mixi_network
 
