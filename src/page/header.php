@@ -1,9 +1,11 @@
 <?php 
-include dirname(__DIR__) . "/func/logger.php";
-// Kiểm tra session để tránh lỗi start 2 lần
+// 1. Khởi tạo session NGAY LẬP TỨC ở dòng đầu tiên
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+// 2. Mới gọi file logger hoặc các file khác
+include dirname(__DIR__) . "/func/logger.php";
 ?>
 <!DOCTYPE html>
 <html lang="en">
