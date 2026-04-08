@@ -24,7 +24,7 @@ services:
     networks:
       - mixi_network
 
-  # THÊM SERVICE WAF MỚI VÀO ĐÂY
+  # THÊM SERVICE WAF MỚI
   waf:
     image: owasp/modsecurity-crs:nginx
     container_name: mixi_waf
