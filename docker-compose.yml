@@ -13,16 +13,29 @@ services:
       - mixi_network
 
   web:
-    # XÓA dòng: build: .
-    image: doanasd/mixi_shop:latest # THÊM dòng này để gọi thẳng Image từ Docker Hub
+    image: doanasd/mixi_shop:latest
     container_name: mixi_app
     restart: always
-    ports:
-      - "8080:80"
+    # XÓA phần ports ở đây để ẩn container web khỏi internet
     depends_on:
       - db
     environment:
       - DB_PASSWORD=${DB_PASSWORD}
+    networks:
+      - mixi_network
+
+  # THÊM SERVICE WAF MỚI VÀO ĐÂY
+  waf:
+    image: owasp/modsecurity-crs:nginx
+    container_name: mixi_waf
+    restart: always
+    ports:
+      - "8080:8080" # Bây giờ WAF sẽ là người giữ cửa ở cổng 8080
+    environment:
+      - BACKEND=http://web:80 # Chỉ đường cho WAF đẩy traffic sạch vào container web
+      - MODSEC_RULE_ENGINE=On # Bật chế độ chặn chủ động (Block)
+    depends_on:
+      - web
     networks:
       - mixi_network
 
