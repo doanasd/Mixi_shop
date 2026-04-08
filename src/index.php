@@ -45,7 +45,7 @@ $top_rated_products = getTopRatedProducts();
                             </a>
                         </div>
                     </div>
-                    <p>Mixue</p>
+                    <p>DOMixue</p>
                     <h6>
                         <a href="detail.php?id=<?php echo $item['id']; ?>" style="text-decoration: none; color: black;">
                             <?php echo $item['name']; ?>
