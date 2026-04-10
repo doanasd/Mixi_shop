@@ -36,7 +36,7 @@ services:
     container_name: mixi_waf
     restart: always
     ports:
-      - "8080:8080" # Chỉ mở port 8080 cho người dùng truy cập
+      - "80:8080" # Chỉ mở port 8080 cho người dùng truy cập
     environment:
       - BACKEND=http://web:80 # Đẩy traffic sạch vào container web
       - MODSEC_RULE_ENGINE=On # Bật chế độ chặn chủ động
