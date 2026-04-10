@@ -50,9 +50,9 @@ pipeline {
                     script {
                         echo "Đang triển khai lên AWS EC2 (${AWS_IP})..."
 
-                        // 1. Tạo thư mục chứa source code và thư mục DB trên AWS
+                        // 1. Tạo thư mục chứa source code, thư mục DB và file rỗng cho log Honeypot trên AWS
                         sh """
-                            ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${AWS_IP} 'mkdir -p ${REMOTE_DIR}/DB'
+                            ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${AWS_IP} 'mkdir -p ${REMOTE_DIR}/DB && touch ${REMOTE_DIR}/honeypot.log'
                         """
 
                         // 2. Ném file docker-compose.yml và file SQL khởi tạo DB qua hầm Tailscale sang AWS
