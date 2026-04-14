@@ -27,7 +27,7 @@ $top_rated_products = getTopRatedProducts();
         <?php endif; ?>
         <section class="title">
             <b></b>
-            <h3>DANH SÁCH SẢN PHẨM</h3>
+            <h3>DANH MỤC SẢN PHẨM</h3>
             <b></b>
         </section>
         
