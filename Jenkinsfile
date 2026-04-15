@@ -63,9 +63,8 @@ pipeline {
 
                         // 3. Chạy lệnh Pull image mới và khởi động lại Docker Compose trên AWS
                         sh """
-                            ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${AWS_IP} 'cd ${REMOTE_DIR} && export DB_PASSWORD=${DB_PASSWORD} && docker-compose down && docker-compose pull && docker-compose up -d'
+                            ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${AWS_IP} 'cd ${REMOTE_DIR} && echo "DB_PASSWORD=${DB_PASSWORD}" > .env && docker-compose down && docker-compose pull && docker-compose up -d'
                         """
-                    }
                 }
             }
         }
