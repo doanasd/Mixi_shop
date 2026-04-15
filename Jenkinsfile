@@ -65,6 +65,7 @@ pipeline {
                         sh """
                             ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${AWS_IP} 'cd ${REMOTE_DIR} && echo "DB_PASSWORD=${DB_PASSWORD}" > .env && docker-compose down && docker-compose pull && docker-compose up -d'
                         """
+                    }
                 }
             }
         }
