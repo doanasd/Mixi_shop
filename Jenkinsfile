@@ -15,7 +15,7 @@ pipeline {
         REMOTE_DIR = '/home/doanvw/mixi_shop'
         
         // Mật khẩu Database (Trong thực tế nên dùng credentials('db-pass'), ở đây hardcode để test)
-        DB_PASSWORD = 'Secret123!' 
+        DB_PASSWORD = credentials('db-password-id') 
     }
 
     stages {
