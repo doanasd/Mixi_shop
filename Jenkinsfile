@@ -69,6 +69,20 @@ pipeline {
                 }
             }
         }
+        stage('Security Scan - Trivy') {
+            steps {
+                script {
+                    echo "Bat dau quet lo hong bao mat tren Image vua Build..."
+                    
+                    // Lệnh 1: Quét và in ra toàn bộ lỗ hổng (để xem log)
+                    sh "trivy image --severity HIGH,CRITICAL ${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}"
+                    
+                    // Lệnh 2: Quét lại nhưng BẬT TÍNH NĂNG ĐÁNH SẬP PIPELINE (exit-code 1)
+                    // Nếu phát hiện lỗ hổng mức CRITICAL, tự động hủy bỏ quy trình Deploy!
+                    sh "trivy image --exit-code 1 --severity CRITICAL ${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}"
+                }
+            }
+        }
     }
 
     post {
