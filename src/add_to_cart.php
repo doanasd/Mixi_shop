@@ -1,36 +1,24 @@
 <?php
 session_start();
+require_once 'func/connect.php';
 
-// Kiểm tra xem Session lưu thông tin đăng nhập có tồn tại không
-// (Lưu ý: Thay 'user_id' hoặc 'username' bằng đúng tên biến session mà file login.php của bạn đang set)
-if (!isset($_SESSION['user_id']) && !isset($_SESSION['username'])) {
-    echo "<script>
-        alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!');
-        window.location.href = 'login.php';
-    </script>";
-    exit(); // Chặn đứng luồng code, không cho thực thi phần thêm giỏ hàng phía dưới
+// Chặn nếu chưa đăng nhập
+if (!isset($_SESSION['user_id'])) {
+    echo "<script>alert('Vui lòng đăng nhập để mua hàng!'); window.location.href='login.php';</script>";
+    exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
-    $id = $_POST['product_id'];
-    $quantity = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
-
-    // Khởi tạo giỏ hàng nếu chưa có
-    if (!isset($_SESSION['cart'])) {
-        $_SESSION['cart'] = [];
-    }
-
-    // Nếu sản phẩm đã có trong giỏ -> cộng dồn số lượng
-    if (isset($_SESSION['cart'][$id])) {
-        $_SESSION['cart'][$id] += $quantity;
+if (isset($_GET['id'])) {
+    $user_id = $_SESSION['user_id']; // Lấy ID từ session
+    $product_id = mysqli_real_escape_string($conn, $_GET['id']);
+    
+    // Lưu món hàng kèm theo user_id để phân biệt chủ sở hữu
+    $sql = "INSERT INTO cart (user_id, product_id, quantity) VALUES ('$user_id', '$product_id', 1)";
+    
+    if (mysqli_query($conn, $sql)) {
+        header("Location: cart.php");
     } else {
-        // Nếu chưa có -> thêm mới
-        $_SESSION['cart'][$id] = $quantity;
+        echo "Lỗi: " . mysqli_error($conn);
     }
-
-    // Chuyển hướng về trang giỏ hàng
-    echo "<script>alert('Đã thêm vào giỏ hàng!'); window.location.href='cart.php';</script>";
-} else {
-    header("Location: index.php");
 }
 ?>
