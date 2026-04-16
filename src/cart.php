@@ -1,8 +1,9 @@
 <?php
+// 1. Phải gọi session_start() trước tiên để kiểm tra đăng nhập
 session_start();
 require_once 'func/connect.php';
 
-// 1. Kiểm tra đăng nhập
+// Kiểm tra đăng nhập (Bảo mật lớp 1)
 if (!isset($_SESSION['user_id'])) {
     echo "<script>alert('Vui lòng đăng nhập để xem giỏ hàng!'); window.location.href='login.php';</script>";
     exit();
@@ -10,170 +11,111 @@ if (!isset($_SESSION['user_id'])) {
 
 $current_user_id = $_SESSION['user_id'];
 
-// 2. Lấy dữ liệu Giỏ hàng chuẩn (Bao gồm cả số lượng và ảnh sản phẩm)
-$sql = "SELECT cart.id as cart_id, cart.quantity, products.name, products.price, products.img 
-        FROM cart 
+// 2. Gọi file header (Giao diện)
+include "./page/header.php";
+
+// 3. Truy vấn lấy Giỏ hàng TỪ DATABASE (Thay vì Session như code gốc)
+// Dùng products.* để lấy tất cả các cột, tránh lỗi sai tên cột
+$sql = "SELECT cart.id as cart_id, cart.quantity, products.* FROM cart 
         JOIN products ON cart.product_id = products.id 
         WHERE cart.user_id = '$current_user_id'";
 $result = mysqli_query($conn, $sql);
 
-$total_all = 0; // Biến tính tổng tiền toàn bộ giỏ hàng
+if (!$result) {
+    die("Lỗi truy vấn Database: " . mysqli_error($conn));
+}
+
+$total_bill = 0; // Biến tính tổng tiền
 ?>
 
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>Giỏ hàng - Mixi Shop</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        /* CSS Phục hồi giao diện Giỏ hàng cực đẹp */
-        .cart-wrapper {
-            max-width: 1000px;
-            margin: 40px auto;
-            background: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-        .cart-title {
-            text-align: center;
-            color: #d32f2f; /* Màu đỏ Mixi */
-            margin-bottom: 30px;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .cart-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-        }
-        .cart-table th, .cart-table td {
-            padding: 15px;
-            text-align: center;
-            border-bottom: 1px solid #eee;
-        }
-        .cart-table th {
-            background-color: #f8f9fa;
-            color: #333;
-            font-weight: bold;
-        }
-        .cart-img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-        .btn-delete {
-            color: #e74c3c;
-            text-decoration: none;
-            font-weight: bold;
-            padding: 8px 12px;
-            border: 1px solid #e74c3c;
-            border-radius: 5px;
-            transition: 0.3s;
-        }
-        .btn-delete:hover {
-            background-color: #e74c3c;
-            color: white;
-        }
-        .cart-summary {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #fdfdfd;
-            padding: 20px;
-            border: 1px dashed #ccc;
-            border-radius: 8px;
-        }
-        .total-price {
-            font-size: 22px;
-            color: #d32f2f;
-            font-weight: bold;
-        }
-        .btn-checkout {
-            background-color: #d32f2f;
-            color: white;
-            padding: 12px 30px;
-            font-size: 18px;
-            font-weight: bold;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: background 0.3s;
-            box-shadow: 0 4px 6px rgba(211, 47, 47, 0.3);
-        }
-        .btn-checkout:hover {
-            background-color: #b71c1c;
-        }
-        .empty-cart {
-            text-align: center;
-            padding: 50px;
-            color: #7f8c8d;
-            font-size: 18px;
-        }
-    </style>
-</head>
-<body>
+<main style="padding: 50px; min-height: 500px;">
+    <h2 style="text-align: center; color: #BD0000; margin-bottom: 30px; text-transform: uppercase;">Giỏ hàng của bạn</h2>
 
-    <?php include "./page/header.php"; ?>
+    <?php if (mysqli_num_rows($result) > 0): ?>
+        <div style="max-width: 1000px; margin: 0 auto;">
+            
+            <table style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+                <thead>
+                    <tr style="background-color: #BD0000; color: white;">
+                        <th style="padding: 15px;">Sản phẩm</th>
+                        <th>Hình ảnh</th>
+                        <th>Đơn giá</th>
+                        <th>Số lượng</th>
+                        <th>Thành tiền</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php 
+                    // Duyệt từng sản phẩm trong Database
+                    while ($row = mysqli_fetch_assoc($result)): 
+                        // Tính thành tiền
+                        $subtotal = $row['price'] * $row['quantity'];
+                        $total_bill += $subtotal;
+                    ?>
+                    <tr style="text-align: center; border-bottom: 1px solid #ddd;">
+                        <td style="padding: 15px; font-weight: bold; color: #333;">
+                            <a href="detail.php?id=<?php echo $row['product_id']; ?>" style="text-decoration: none; color: inherit;">
+                                <?php echo $row['name']; ?>
+                            </a>
+                        </td>
+                        <td>
+                            <img src="<?php echo $row['image']; ?>" width="60" style="border-radius: 5px;" onerror="this.src='./img/default.jpg'">
+                        </td>
+                        
+                        <td><?php echo number_format($row['price']); ?> đ</td>
+                        
+                        <td style="font-weight: bold; <?php if($row['quantity'] < 0) echo 'color: red;'; ?>">
+                            <?php echo $row['quantity']; ?>
+                        </td>
 
-    <main>
-        <div class="cart-wrapper">
-            <h1 class="cart-title">🛒 GIỎ HÀNG CỦA BẠN</h1>
+                        <td style="color: #BD0000; font-weight: bold;">
+                            <?php echo number_format($subtotal); ?> đ
+                        </td>
+                        
+                        <td>
+                            <a href="remove_cart.php?id=<?php echo $row['cart_id']; ?>" onclick="return confirm('Bạn có chắc muốn xóa?')" style="color: #888;">
+                                <i class="fa-solid fa-trash"></i> Xóa
+                            </a>
+                        </td>
+                    </tr>
+                    <?php endwhile; ?>
+                </tbody>
+                <tfoot>
+                    <tr style="font-size: 18px; font-weight: bold; background-color: #f2f2f2;">
+                        <td colspan="4" style="text-align: right; padding: 20px;">TỔNG THANH TOÁN:</td>
+                        <td style="color: #BD0000; padding: 20px; font-size: 20px;">
+                            <?php echo number_format($total_bill); ?> đ
+                        </td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
 
-            <?php if (mysqli_num_rows($result) > 0): ?>
-                <table class="cart-table">
-                    <thead>
-                        <tr>
-                            <th>Hình ảnh</th>
-                            <th>Tên sản phẩm</th>
-                            <th>Đơn giá</th>
-                            <th>Số lượng</th>
-                            <th>Thành tiền</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php while($row = mysqli_fetch_assoc($result)): 
-                            // Tính thành tiền cho từng sản phẩm
-                            $subtotal = $row['price'] * $row['quantity'];
-                            $total_all += $subtotal; // Cộng dồn vào tổng hóa đơn
-                        ?>
-                        <tr>
-                            <td><img src="./img/<?php echo $row['img']; ?>" alt="Product Image" class="cart-img" onerror="this.src='./img/default.jpg'"></td>
-                            
-                            <td style="font-weight: bold;"><?php echo $row['name']; ?></td>
-                            <td><?php echo number_format($row['price']); ?> đ</td>
-                            <td><?php echo $row['quantity']; ?></td>
-                            <td style="color: #e67e22; font-weight: bold;"><?php echo number_format($subtotal); ?> đ</td>
-                            
-                            <td>
-                                <a href="remove_cart.php?id=<?php echo $row['cart_id']; ?>" class="btn-delete" onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');">Xóa</a>
-                            </td>
-                        </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
-
-                <div class="cart-summary">
-                    <div class="total-price">
-                        Tổng thanh toán: <?php echo number_format($total_all); ?> đ
-                    </div>
-                    <a href="checkout.php" class="btn-checkout">💳 TIẾN HÀNH THANH TOÁN</a>
-                </div>
-
-            <?php else: ?>
-                <div class="empty-cart">
-                    <img src="./img/empty-cart.png" alt="Empty Cart" style="width: 150px; opacity: 0.5; margin-bottom: 20px;" onerror="this.style.display='none'">
-                    <p>Giỏ hàng của bạn đang trống.</p>
-                    <a href="index.php" style="color: #d32f2f; text-decoration: none; font-weight: bold;">← Tiếp tục mua sắm</a>
-                </div>
-            <?php endif; ?>
-
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="index.php" style="padding: 15px 30px; border: 1px solid #BD0000; color: #BD0000; text-decoration: none; border-radius: 5px; margin-right: 20px; font-weight: bold;">
+                    <i class="fa-solid fa-arrow-left"></i> TIẾP TỤC MUA
+                </a>
+                
+                <form action="checkout.php" method="POST" style="display: inline-block;">
+                    <input type="hidden" name="final_total" value="<?php echo $total_bill; ?>">
+                    
+                    <button type="submit" style="background-color: #BD0000; color: white; padding: 15px 40px; border: none; font-weight: bold; border-radius: 5px; cursor: pointer; transition: 0.3s;">
+                        THANH TOÁN NGAY <i class="fa-solid fa-credit-card"></i>
+                    </button>
+                </form>
+             </div>
         </div>
-    </main>
+    <?php else: ?>
+        <div style="text-align: center; padding: 50px;">
+            <i class="fa-solid fa-cart-arrow-down" style="font-size: 60px; color: #ddd; margin-bottom: 20px;"></i>
+            <p style="font-size: 18px; color: #666;">Giỏ hàng của bạn đang trống.</p>
+            <br>
+            <a href="index.php" style="color: #BD0000; font-weight: bold; text-decoration: none; font-size: 16px;">
+                Quay lại trang chủ mua sắm ngay
+            </a>
+        </div>
+    <?php endif; ?>
+</main>
 
-    <?php include "./page/footer.php"; ?>
-
-</body>
-</html>
+<?php include "./page/footer.php"; ?>
