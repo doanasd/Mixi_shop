@@ -68,9 +68,6 @@ include dirname(__DIR__) . "/func/logger.php";
                     <i class="fa-solid fa-cart-shopping fa-xl" style="color: #c62d2d;"></i>
                     
                 </a>
-                <span style="color: #c62d2d; font-weight: bold;">
-                        (<?php echo isset($_SESSION['cart']) ? array_sum($_SESSION['cart']) : 0; ?>)
-                    </span>
             </section>
         </section>
     </header>
