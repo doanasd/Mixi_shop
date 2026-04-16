@@ -1,4 +1,28 @@
 <?php
+session_start();
+require_once 'func/connect.php';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = mysqli_real_escape_string($conn, $_POST['username']);
+    $password = $_POST['password'];
+
+    $sql = "SELECT * FROM users WHERE username = '$username' AND password = '$password'";
+    $result = mysqli_query($conn, $sql);
+
+    if (mysqli_num_rows($result) > 0) {
+        $user = mysqli_fetch_assoc($result);
+        
+        // 🔑 LƯU ID VÀO SESSION ĐỂ LIÊN KẾT GIỎ HÀNG
+        $_SESSION['user_id'] = $user['ID']; 
+        $_SESSION['username'] = $user['username'];
+
+        echo "<script>alert('Đăng nhập thành công!'); window.location.href='index.php';</script>";
+    } else {
+        echo "<script>alert('Sai tài khoản hoặc mật khẩu!'); window.history.back();</script>";
+    }
+}
+?>
+<?php
 include "./page/header.php";
 
 // Xử lý logic đăng nhập khi có dữ liệu POST gửi lên
