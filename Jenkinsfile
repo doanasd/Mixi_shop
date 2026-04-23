@@ -37,15 +37,14 @@ pipeline {
             steps {
                 echo 'Đồng bộ cấu hình và cập nhật Container trên EC2...'
                 sh '''
-                # 1. Gửi file docker-compose.yml mới nhất sang EC2
+                # 1. Gửi file docker-compose.yml sang EC2
                 scp -o StrictHostKeyChecking=no docker-compose.yml $EC2_USER@$EC2_IP:$EC2_DIR/docker-compose.yml
 
-                # 2. Truy cập EC2 và khởi động lại hệ thống với biến mật khẩu mới
+                # 2. Truy cập EC2 và khởi động (Lưu ý dấu nháy đơn bao quanh $SECRET_DB_PASS)
                 ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP "
                     cd $EC2_DIR &&
-                    export DB_PASSWORD=\\$SECRET_DB_PASS &&
                     docker-compose pull web &&
-                    docker-compose up -d --remove-orphans
+                    DB_PASSWORD='${SECRET_DB_PASS}' docker-compose up -d --remove-orphans
                 "
                 '''
             }
