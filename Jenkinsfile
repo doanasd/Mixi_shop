@@ -33,6 +33,14 @@ pipeline {
                 sh 'docker push ${IMAGE_NAME}'
             }
         }
+        
+        stage('🛡️ Security Scan (Trivy)') {
+            steps {
+                echo 'Đang quét lỗ hổng bảo mật cho Image...'
+                // Quét lỗ hổng mức độ High và Critical, nếu có lỗi sẽ dừng Pipeline
+                sh "trivy image --severity HIGH,CRITICAL --exit-code 1 ${IMAGE_NAME}"
+            }
+        }
 
         stage('🚀 Deploy to AWS EC2 (Zero-Trust)') {
             steps {
