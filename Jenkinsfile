@@ -28,19 +28,19 @@ pipeline {
             }
         }
 
-        stage('🚀 Deploy to AWS EC2') {
-            steps {
-                sh '''
-                ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP "
-                    cd $EC2_DIR &&
-                    export DB_PASSWORD=\\$SECRET_DB_PASS &&
-                    docker-compose pull web &&
-                    docker-compose up -d
-                "
-                '''
+         stage('🚀 Deploy to AWS EC2') {
+                steps {
+                    echo 'Cập nhật hệ thống trên EC2...'
+                    sh '''
+                    ssh -o StrictHostKeyChecking=no doanvw@100.109.127.58 "
+                        cd /home/doanvw/mixi_shop &&
+                        export DB_PASSWORD=\\$SECRET_DB_PASS &&
+                        docker-compose pull web &&
+                        docker-compose up -d --remove-orphans
+                    "
+                    '''
+                }
             }
-        }
-    }
     // Các hành động dọn dẹp và thông báo sau khi Pipeline chạy xong
     post {
         success {
