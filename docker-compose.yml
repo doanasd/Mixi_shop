@@ -6,16 +6,17 @@ services:
     container_name: mixi_app
     restart: always
     environment:
-      # Lấy biến từ máy EC2 truyền vào bên trong Container
+      # Nhận mật khẩu từ lệnh export trong Jenkinsfile
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_USERNAME=admin
+      # Thông tin kết nối AWS RDS của bạn
       - DB_HOST=mixishop-db-server.cpokqmmuq5tj.ap-southeast-1.rds.amazonaws.com
+      - DB_USERNAME=admin
       - DB_NAME=mixi_shop
     volumes:
       - ./honeypot.log:/var/www/honeypot_access.log
     networks:
       - mixi_network
-  # Tường lửa WAF 
+
   waf:
     image: owasp/modsecurity-crs:nginx
     container_name: mixi_waf
