@@ -44,8 +44,8 @@ pipeline {
                 ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_IP} '
                     cd ${EC2_DIR} &&
                     export DB_PASSWORD="${SECRET_DB_PASS}" &&
-                    docker compose pull web &&
-                    docker compose up -d
+                    docker-compose pull web &&
+                    docker-compose up -d
                 '
                 """
             }
