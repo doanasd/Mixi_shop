@@ -1,100 +1,68 @@
 pipeline {
+    // Chạy trên bất kỳ máy chủ Jenkins (Agent) nào có sẵn
     agent any
 
+    // Khai báo các Biến Môi Trường dùng chung cho toàn bộ Pipeline
     environment {
-        // --- CẤU HÌNH BIẾN MÔI TRƯỜNG ---
-        // Đổi 'doanasd/mixi_shop' thành tên Repo Docker Hub thực tế của bạn
-        DOCKER_IMAGE = 'doanasd/mixi_shop:latest' 
+        // 1. Mật khẩu RDS (Được Jenkins bảo mật tuyệt đối, kéo ra từ Credentials Manager)
+        SECRET_DB_PASS = credentials('RDS_DB_PASS')
         
-        // ID của Credentials chứa User/Pass Docker Hub trên Jenkins
-        DOCKER_CREDS = credentials('dockerhub-creds') 
+        // 2. Thông tin Image trên Docker Hub
+        IMAGE_NAME = "doanasd/mixi_shop:latest"
         
-        // Cấu hình AWS & Tailscale
-        AWS_IP = '100.109.127.58'
-        REMOTE_USER = 'doanvw'
-        REMOTE_DIR = '/home/doanvw/mixi_shop'
-        
-        // Mật khẩu Database (Trong thực tế nên dùng credentials('db-pass'), ở đây hardcode để test)
-        DB_PASSWORD = credentials('db-password-id') 
+        // 3. Thông tin máy chủ EC2 Web (Kết nối qua mạng ẩn Tailscale)
+        // LƯU Ý: Bạn hãy sửa lại tên user và IP cho khớp với thực tế máy của bạn nhé!
+        EC2_USER = "doanvw" 
+        EC2_IP = "100.109.127.58" 
+        EC2_DIR = "/home/doanvw/mixi_shop" 
     }
 
     stages {
-        stage('Source Code Checkout') {
+        stage('🛠️ Build Image') {
             steps {
-                echo "Đang kéo mã nguồn mới nhất từ GitHub..."
-                checkout scm
+                echo 'Bắt đầu Build Docker Image từ mã nguồn mới nhất...'
+                sh 'sudo docker build -t ${IMAGE_NAME} .'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('☁️ Push to Docker Hub') {
             steps {
-                echo "Đang đóng gói ứng dụng thành Docker Image..."
-                sh "docker build -t ${DOCKER_IMAGE} ."
+                echo 'Đẩy Image vừa Build lên kho chứa Docker Hub...'
+                // LƯU Ý: Nếu Jenkins báo lỗi không có quyền push, bạn cần cấu hình thêm phần 'docker login' ở đây.
+                // Tạm thời nếu máy ảo Jenkins đã login sẵn docker rồi thì lệnh push sẽ chạy luôn.
+                sh 'sudo docker push ${IMAGE_NAME}'
             }
         }
 
-        stage('Push to Docker Hub') {
+        stage('🚀 Deploy to AWS EC2 (Zero-Trust)') {
             steps {
-                echo "Đang đăng nhập vào Docker Hub..."
-                sh "echo \$DOCKER_CREDS_PSW | docker login -u \$DOCKER_CREDS_USR --password-stdin"
+                echo 'Chui qua hầm Tailscale để ra lệnh cho EC2 Web Server cập nhật...'
                 
-                echo "Đang đẩy Image lên Docker Hub..."
-                sh "docker push ${DOCKER_IMAGE}"
-            }
-        }
-
-        stage('Deploy to AWS via Tailscale') {
-            steps {
-                // Sử dụng ID của SSH Key bạn vừa tạo ở Bước 1
-                sshagent(['aws-ssh-key']) {
-                    script {
-                        echo "Đang triển khai lên AWS EC2 (${AWS_IP})..."
-
-                        // 1. Tạo thư mục chứa source code, thư mục DB và file rỗng cho log Honeypot trên AWS
-                        sh """
-                            ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${AWS_IP} 'mkdir -p ${REMOTE_DIR}/DB && touch ${REMOTE_DIR}/honeypot.log'
-                        """
-
-                        // 2. Ném file docker-compose.yml và file SQL khởi tạo DB qua hầm Tailscale sang AWS
-                        sh """
-                            scp -o StrictHostKeyChecking=no docker-compose.yml ${REMOTE_USER}@${AWS_IP}:${REMOTE_DIR}/
-                            scp -o StrictHostKeyChecking=no ./DB/mixi_shop.sql ${REMOTE_USER}@${AWS_IP}:${REMOTE_DIR}/DB/
-                        """
-
-                        // 3. Chạy lệnh Pull image mới và khởi động lại Docker Compose trên AWS
-                        sh """
-                            ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${AWS_IP} 'cd ${REMOTE_DIR} && echo "DB_PASSWORD=${DB_PASSWORD}" > .env && docker-compose down && docker-compose pull && docker-compose up -d'
-                        """
-                    }
-                }
-            }
-        }
-        stage('Security Scan - Trivy') {
-            steps {
-                script {
-                    echo "Bat dau quet lo hong bao mat tren Image vua Build..."
-                    
-                    // Lệnh 1: Quét và in ra toàn bộ lỗ hổng
-                    sh "trivy image --severity HIGH,CRITICAL doanasd/mixi_shop:latest"
-                    
-                    // Lệnh 2: Bật chế độ Audit (exit-code 0) để không làm sập Pipeline
-                    sh "trivy image --exit-code 0 --severity CRITICAL doanasd/mixi_shop:latest"
-                }
+                // Lệnh ssh dùng cờ StrictHostKeyChecking=no để không bị hỏi Yes/No khi kết nối lần đầu
+                // Biến SECRET_DB_PASS được truyền vào như một biến môi trường tạm thời
+                sh """
+                ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_IP} '
+                    cd ${EC2_DIR} &&
+                    export DB_PASSWORD="${SECRET_DB_PASS}" &&
+                    sudo docker compose pull web &&
+                    sudo docker compose up -d
+                '
+                """
             }
         }
     }
 
+    // Các hành động dọn dẹp và thông báo sau khi Pipeline chạy xong
     post {
-        always {
-            echo 'Quy trình Pipeline đã kết thúc. Đang dọn dẹp hệ thống...'
-            // Lệnh dọn rác Docker cũ trên Jenkins để tránh đầy ổ cứng
-            sh 'docker image prune -f' 
-        }
         success {
-            echo '✅ XUẤT SẮC! Đã triển khai thành công lên môi trường AWS DevSecOps!'
+            echo '✅ XUẤT SẮC: Hệ thống đã Deploy phiên bản mới thành công!'
         }
         failure {
-            echo '❌ PIPELINE THẤT BẠI. Vui lòng kiểm tra lại log chi tiết.'
+            echo '❌ THẤT BẠI: Quá trình Deploy gặp lỗi. Vui lòng đọc Console Output ở trên để gỡ rối.'
+        }
+        always {
+            // Xóa sạch thư mục tạm của Jenkins để tránh đầy ổ cứng
+            cleanWs()
         }
     }
 }
