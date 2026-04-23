@@ -41,6 +41,7 @@ pipeline {
                     '''
                 }
             }
+    }
     // Các hành động dọn dẹp và thông báo sau khi Pipeline chạy xong
     post {
         success {
