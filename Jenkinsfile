@@ -1,35 +1,64 @@
-version: '3.8'
+pipeline {
+    agent any
 
-services:
-  web:
-    image: doanasd/mixi_shop:latest
-    container_name: mixi_app
-    restart: always
-    environment:
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=mixishop-db-server.cpokqmmuq5tj.ap-southeast-1.rds.amazonaws.com
-      - DB_USERNAME=admin
-      - DB_NAME=mixi_shop
-    volumes:
-      - ./honeypot.log:/var/www/honeypot_access.log
-    networks:
-      - mixi_network
+    environment {
+        // Gọi ID Credentials bạn đã tạo trên Jenkins
+        SECRET_DB_PASS = credentials('RDS_DB_PASS')
+        IMAGE_NAME = "doanasd/mixi_shop:latest"
+        EC2_USER = "doanvw"
+        EC2_IP = "100.109.127.58"
+        EC2_DIR = "/home/doanvw/mixi_shop"
+    }
 
-  waf:
-    image: owasp/modsecurity-crs:nginx
-    container_name: mixi_waf
-    restart: always
-    ports:
-      - "80:8080"
-    environment:
-      - BACKEND=http://web:80
-    volumes:
-      - ./waf_logs:/var/log/nginx
-    depends_on:
-      - web
-    networks:
-      - mixi_network
+    stages {
+        stage('🛠️ Build Docker Image') {
+            steps {
+                echo 'Bắt đầu đóng gói Image...'
+                sh "docker build -t ${IMAGE_NAME} ."
+            }
+        }
 
-networks:
-  mixi_network:
-    driver: bridge
+        stage('🛡️ Security Scan (Trivy)') {
+            steps {
+                echo 'Đang quét lỗ hổng bảo mật Image...'
+                // Quét mức độ Cao và Nghiêm trọng, không dừng pipeline để bạn theo dõi kết quả
+                sh "trivy image --skip-version-check --severity HIGH,CRITICAL --exit-code 0 ${IMAGE_NAME}"
+            }
+        }
+
+        stage('☁️ Push to Docker Hub') {
+            steps {
+                echo 'Đẩy Image lên Docker Hub...'
+                sh "docker push ${IMAGE_NAME}"
+            }
+        }
+
+        stage('🚀 Deploy to AWS EC2') {
+            steps {
+                echo 'Đồng bộ cấu hình và cập nhật Container trên EC2...'
+                sh '''
+                # 1. Gửi file docker-compose.yml mới nhất sang EC2
+                scp -o StrictHostKeyChecking=no docker-compose.yml $EC2_USER@$EC2_IP:$EC2_DIR/docker-compose.yml
+
+                # 2. Truy cập EC2 và khởi động lại hệ thống với biến mật khẩu mới
+                ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP "
+                    cd $EC2_DIR &&
+                    export DB_PASSWORD=\\$SECRET_DB_PASS &&
+                    docker-compose pull web &&
+                    docker-compose up -d --remove-orphans
+                "
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Dọn dẹp không gian làm việc...'
+            cleanWs()
+        }
+        success {
+            echo '✅ CHÚC MỪNG: Hệ thống đã triển khai thành công và an toàn!'
+        }
+    }
+}
