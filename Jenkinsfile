@@ -21,7 +21,7 @@ pipeline {
         stage('🛠️ Build Image') {
             steps {
                 echo 'Bắt đầu Build Docker Image từ mã nguồn mới nhất...'
-                sh 'sudo docker build -t ${IMAGE_NAME} .'
+                sh 'docker build -t ${IMAGE_NAME} .'
             }
         }
 
@@ -30,7 +30,7 @@ pipeline {
                 echo 'Đẩy Image vừa Build lên kho chứa Docker Hub...'
                 // LƯU Ý: Nếu Jenkins báo lỗi không có quyền push, bạn cần cấu hình thêm phần 'docker login' ở đây.
                 // Tạm thời nếu máy ảo Jenkins đã login sẵn docker rồi thì lệnh push sẽ chạy luôn.
-                sh 'sudo docker push ${IMAGE_NAME}'
+                sh 'docker push ${IMAGE_NAME}'
             }
         }
 
