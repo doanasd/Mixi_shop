@@ -1,47 +1,29 @@
 version: '3.8'
 
 services:
-  # Lớp 1: Cơ sở dữ liệu (Chỉ nằm trong mạng nội bộ)
-  db:
-    image: mysql:8.0
-    container_name: mixi_db
-    restart: always
-    environment:
-      MYSQL_DATABASE: mixi_shop
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - ./DB/mixi_shop.sql:/docker-entrypoint-initdb.d/mixi_shop.sql
-      - db_data:/var/lib/mysql
-    networks:
-      - mixi_network
-
-  # Lớp 2: Ứng dụng Web (Bị giấu kín, không mở port ra ngoài)
+  # Ứng dụng Web 
   web:
     image: doanasd/mixi_shop:latest
     container_name: mixi_app
     restart: always
-    depends_on:
-      - db
     environment:
-      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_PASSWORD=${DB_PASSWORD} # Docker sẽ lấy biến này từ máy chủ Ubuntu để nhét vào PHP
     volumes:
-      # Gắn file log Honeypot ra máy chủ AWS để Wazuh Agent thu thập
       - ./honeypot.log:/var/www/honeypot_access.log
     networks:
       - mixi_network
 
-  # Lớp 3: Tường lửa WAF (Cổng vào duy nhất của hệ thống)
+  # Tường lửa WAF 
   waf:
     image: owasp/modsecurity-crs:nginx
     container_name: mixi_waf
     restart: always
     ports:
-      - "80:8080" # Chỉ mở port 8080 cho người dùng truy cập
+      - "80:8080"
     environment:
-      - BACKEND=http://web:80 # Đẩy traffic sạch vào container web
-      - MODSEC_RULE_ENGINE=On # Bật chế độ chặn chủ động
+      - BACKEND=http://web:80
+      - MODSEC_RULE_ENGINE=On
     volumes:
-      # Gắn log của WAF ra máy chủ AWS để Wazuh Agent theo dõi SQLi/XSS
       - ./waf_logs:/var/log/nginx
     depends_on:
       - web
@@ -51,6 +33,3 @@ services:
 networks:
   mixi_network:
     driver: bridge
-
-volumes:
-  db_data:
