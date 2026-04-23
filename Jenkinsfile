@@ -30,10 +30,14 @@ pipeline {
 
          stage('🚀 Deploy to AWS EC2') {
             steps {
+                echo 'Gửi file cấu hình và cập nhật hệ thống trên EC2...'
                 sh '''
+                # 1. Gửi file docker-compose.yml từ Jenkins sang EC2 trước khi ra lệnh deploy
+                scp -o StrictHostKeyChecking=no docker-compose.yml $EC2_USER@$EC2_IP:$EC2_DIR/docker-compose.yml
+
+                # 2. Thực thi lệnh cập nhật qua SSH
                 ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP "
                     cd $EC2_DIR &&
-                    # Gán giá trị bí mật vào biến môi trường hệ thống trên EC2
                     export DB_PASSWORD=\\$SECRET_DB_PASS && 
                     docker-compose pull web &&
                     docker-compose up -d --remove-orphans
