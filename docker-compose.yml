@@ -1,18 +1,20 @@
 version: '3.8'
 
 services:
-  # Ứng dụng Web 
   web:
     image: doanasd/mixi_shop:latest
     container_name: mixi_app
     restart: always
     environment:
-      - DB_PASSWORD=${DB_PASSWORD} # Docker sẽ lấy biến này từ máy chủ Ubuntu để nhét vào PHP
+      # Lấy biến từ máy EC2 truyền vào bên trong Container
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_USERNAME=admin
+      - DB_HOST=mixishop-db-server.cpokqmmuq5tj.ap-southeast-1.rds.amazonaws.com
+      - DB_NAME=mixi_shop
     volumes:
       - ./honeypot.log:/var/www/honeypot_access.log
     networks:
       - mixi_network
-
   # Tường lửa WAF 
   waf:
     image: owasp/modsecurity-crs:nginx
