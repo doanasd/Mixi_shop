@@ -1,7 +1,7 @@
 <?php
     // 1. Đổi thành tên service database trong file docker-compose.yml
-    $servername = "db"; 
-    $usname = "root";
+    $servername = "mixishop-db-server.cpokqmmuq5tj.ap-southeast-1.rds.amazonaws.com";
+    $username = "admin";
     
     // 2. Lấy mật khẩu linh hoạt từ biến môi trường của Docker
     $pass = getenv('DB_PASSWORD'); 
