@@ -1,15 +1,20 @@
 <?php
-    // 1. Đổi thành tên service database trong file docker-compose.yml
-    $servername = "mixishop-db-server.cpokqmmuq5tj.ap-southeast-1.rds.amazonaws.com";
-    $username = "admin";
-    
-    // 2. Lấy mật khẩu linh hoạt từ biến môi trường của Docker
-    $pass = getenv('DB_PASSWORD'); 
-    
-    $database = "mixi_shop";
+// Lấy thông tin từ biến môi trường mà Docker Compose đã truyền vào
+$servername = getenv('DB_HOST') ?: "mixishop-db-server.cpokqmmuq5tj.ap-southeast-1.rds.amazonaws.com";
+$username = getenv('DB_USERNAME') ?: "admin";
+$dbname = getenv('DB_NAME') ?: "mixi_shop";
+$password = getenv('DB_PASSWORD'); // Mật khẩu bí mật từ Jenkins
 
-    $conn = new mysqli($servername, $usname, $pass, $database);
-    if ($conn->connect_error){
-        die("Connection failed: ".$conn->connect_error);
-    } 
+// Kiểm tra nếu password trống (để debug)
+if (!$password) {
+    die("Lỗi: Không tìm thấy mật khẩu Database trong biến môi trường.");
+}
+
+// Tạo kết nối
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Kiểm tra kết nối
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
 ?>
