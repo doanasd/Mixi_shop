@@ -38,9 +38,8 @@ pipeline {
                 # 2. Thực thi lệnh cập nhật qua SSH
                 ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP "
                     cd $EC2_DIR &&
-                    export DB_PASSWORD=\\$SECRET_DB_PASS && 
-                    docker-compose pull web &&
-                    docker-compose up -d --remove-orphans
+                    # Sử dụng lệnh up -d để cập nhật container với biến môi trường mới
+                    DB_PASSWORD='${SECRET_DB_PASS}' docker-compose up -d --remove-orphans
                 "
                 '''
             }
