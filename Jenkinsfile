@@ -66,6 +66,7 @@ pipeline {
                                 cd ${EC2_DIR} &&
                                 export DB_PASSWORD='${SECRET_DB_PASS}' &&
                                 docker compose pull web &&
+                                docker compose down &&
                                 docker compose up -d --force-recreate --remove-orphans
                             "
                             """
