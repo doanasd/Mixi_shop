@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Gọi các Credentials đã cấu hình trên Jenkins
-        DOCKER_CREDS = credentials('docker-hub-credentials') // Đổi ID này nếu của bạn khác
+        DOCKER_CREDS = credentials('dockerhub-creds') // Đổi ID này nếu của bạn khác
         SECRET_DB_PASS = credentials('RDS_DB_PASS')
         
         // Các biến môi trường của dự án
