@@ -28,6 +28,7 @@ services:
       - MODSEC_RULE_ENGINE=On
     volumes:
       - ./waf_logs:/var/log/nginx
+      - ./nginx_config/real_ip.conf:/etc/nginx/conf.d/real_ip.conf:ro
     depends_on:
       - web
     networks:
