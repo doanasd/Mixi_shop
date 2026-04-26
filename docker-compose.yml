@@ -28,6 +28,7 @@ services:
       - MODSEC_RULE_ENGINE=On
     volumes:
       - ./waf_logs:/var/log/nginx
+      - ./custom-botnet.conf:/etc/modsecurity.d/owasp-crs/rules/custom-botnet.conf:ro
     depends_on:
       - web
     networks:
