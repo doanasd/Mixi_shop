@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Gọi các Credentials đã cấu hình trên Jenkins
-        DOCKER_CREDS = credentials('dockerhub-creds') // Đổi ID này nếu của bạn khác
+        DOCKER_CREDS = credentials('dockerhub-creds') 
         SECRET_DB_PASS = credentials('RDS_DB_PASS')
         
         // Các biến môi trường của dự án
@@ -26,33 +26,34 @@ pipeline {
         stage('🛡️ Security Scan (Trivy)') {
             steps {
                 echo 'Đang quét lỗ hổng bảo mật với Trivy...'
-                // Quét và chỉ báo lỗi nếu gặp lỗ hổng mức HIGH hoặc CRITICAL
-                sh "trivy image --severity HIGH,CRITICAL ${IMAGE_NAME}"
+                // Đã tối ưu hóa: Thêm timeout 15 phút, bỏ qua check version và chỉ định quét vuln (rút ngắn thời gian quét)
+                sh "trivy image --timeout 15m --skip-version-check --scanners vuln --severity HIGH,CRITICAL ${IMAGE_NAME}"
             }
         }
 
         stage('🚀 Push Image to Docker Hub') {
             steps {
                 echo 'Đang đẩy Image lên Docker Hub...'
-                sh """
-                    echo ${DOCKER_CREDS_PSW} | docker login -u ${DOCKER_CREDS_USR} --password-stdin
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                    sh """
+                    echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin
                     docker push ${IMAGE_NAME}
-                """
+                    """
+                }
             }
         }
 
         stage('🌐 Deploy to Multi-Server (HA)') {
             steps {
                 script {
-                    // Tách chuỗi IP thành mảng
-                    def nodes = env.SERVER_LIST.split(',')
+                    // Chuyển chuỗi SERVER_LIST thành mảng
+                    def servers = SERVER_LIST.split(',').collect { it.trim() }
                     
-                    // Gọi ID của Credential SSH vừa tạo ở Phần 1
-                    sshagent (credentials: ['aws-ssh-key']) {
+                    // Vòng lặp SSH vào từng server để Deploy
+                    for (int i = 0; i < servers.size(); i++) {
+                        def target_ip = servers[i]
                         
-                        // Lặp qua từng server để triển khai (Rolling Update cơ bản)
-                        for (ip in nodes) {
-                            def target_ip = ip.trim()
+                        withCredentials([string(credentialsId: 'RDS_DB_PASS', variable: 'SECRET_DB_PASS')]) {
                             echo "=========================================="
                             echo "Đang triển khai tới Server: ${target_ip}"
                             echo "=========================================="
