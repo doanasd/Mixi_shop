@@ -34,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['role'] = "user";
                 echo "<script>
                         alert('Đăng nhập thành công!');
-                        window.location.href='index.php';
+                        window.location.href='profile.php';
                       </script>";
                 exit(); // Bắt buộc phải có exit()
             }
