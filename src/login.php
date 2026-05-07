@@ -2,69 +2,50 @@
 session_start();
 require_once 'func/connect.php';
 
+$error_message = ""; // Biến lưu thông báo lỗi
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = mysqli_real_escape_string($conn, $_POST['username']);
-    $password = $_POST['password'];
-
-    $sql = "SELECT * FROM users WHERE username = '$username' AND password = '$password'";
-    $result = mysqli_query($conn, $sql);
-
-    if (mysqli_num_rows($result) > 0) {
-        $user = mysqli_fetch_assoc($result);
-        
-        // 🔑 LƯU ID VÀO SESSION ĐỂ LIÊN KẾT GIỎ HÀNG
-        $_SESSION['user_id'] = $user['ID']; 
-        $_SESSION['username'] = $user['username'];
-
-        echo "<script>alert('Đăng nhập thành công!'); window.location.href='index.php';</script>";
-    } else {
-        echo "<script>alert('Sai tài khoản hoặc mật khẩu!'); window.history.back();</script>";
-    }
-}
-?>
-<?php
-include "./page/header.php";
-
-// Xử lý logic đăng nhập khi có dữ liệu POST gửi lên
-if (isset($_POST['username']) && isset($_POST['password'])) {
+    // LƯU Ý BẢO MẬT: Giữ nguyên lỗi SQL Injection theo cấu trúc cũ của bạn để demo
     $name = $_POST['username'];
     $passwd = $_POST['password'];
 
     if ($name == "" || $passwd == "") {
-        echo "<script>alert('Hãy điền đầy đủ thông tin')</script>";
+         $error_message = "Hãy điền đầy đủ thông tin!";
     } else {
-        require_once "./func/connect.php";
-        
-        // LƯU Ý BẢO MẬT: Code này đang dính lỗi SQL Injection do nối chuỗi trực tiếp.
-        // Bạn có thể dùng lỗi này để demo tấn công ' OR 1=1 -- 
         $sql = "SELECT * FROM users WHERE username = '$name' AND password = '$passwd'";
-        
         $rs = $conn->query($sql);
-        if ($rs->num_rows > 0) {
-            $_SESSION['username'] = $name;
+
+        if ($rs && $rs->num_rows > 0) {
             $row = $rs->fetch_assoc();
+            
+            // 🔑 LƯU ID VÀO SESSION ĐỂ LIÊN KẾT GIỎ HÀNG VÀ CHỨC NĂNG KHÁC
+            $_SESSION['user_id'] = $row['ID']; 
+            $_SESSION['username'] = $row['username'];
             
             // Phân quyền chuyển hướng
             if ($row['role'] == "admin") {
                 $_SESSION['role'] = "admin";
                 echo "<script>
-                   alert('Đăng nhập thành công! Chào mừng Admin.');
-                   window.location.href='./admin/index.php';
-                   </script>";
+                        alert('Đăng nhập thành công! Chào mừng Admin.');
+                        window.location.href='./admin/index.php';
+                      </script>";
+                exit(); // Bắt buộc phải có exit() để dừng kịch bản
             } else {
-                // Mặc định là user
                 $_SESSION['role'] = "user";
                 echo "<script>
-                    alert('Đăng nhập thành công!');
-                    window.location.href='index.php';
-                    </script>";
+                        alert('Đăng nhập thành công!');
+                        window.location.href='index.php';
+                      </script>";
+                exit(); // Bắt buộc phải có exit()
             }
         } else {
-            echo "<script>alert('Sai tên đăng nhập hoặc mật khẩu!')</script>";
+            $error_message = "Sai tài khoản hoặc mật khẩu!";
         }
     }
 }
 ?>
+
+<?php include "./page/header.php"; ?>
 
 <main>
     <div class="login-container">
@@ -73,6 +54,12 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
                 <h1>ĐĂNG NHẬP</h1>
             </section>
             
+            <?php if(!empty($error_message)): ?>
+                <p style="color: red; text-align: center; font-weight: bold; margin-bottom: 15px;">
+                    <?php echo $error_message; ?>
+                </p>
+            <?php endif; ?>
+
             <input type="text" name="username" placeholder="Tên đăng nhập hoặc email" required>
             <input type="password" name="password" id="password" placeholder="Nhập mật khẩu" required>
             
