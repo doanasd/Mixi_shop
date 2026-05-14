@@ -21,11 +21,15 @@ WORKDIR /var/www/html
 COPY ./src /var/www/html/
 
 # 6. Phân quyền chặt chẽ cho toàn bộ thư mục web
-# Sau đó nới lỏng riêng cho thư mục uploads
+# Tạo thư mục uploads ra NGOÀI webroot (/var/www/uploads)
 RUN chown -R www-data:www-data /var/www/html && \
     chmod -R 755 /var/www/html && \
-    mkdir -p /var/www/html/uploads && \
-    chmod -R 775 /var/www/html/uploads
+    mkdir -p /var/www/uploads && \
+    chown -R www-data:www-data /var/www/uploads && \
+    chmod -R 775 /var/www/uploads
+
+# Expose cổng 80
+EXPOSE 80
 
 # Expose cổng 80
 EXPOSE 80
