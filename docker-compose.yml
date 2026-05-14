@@ -14,8 +14,6 @@ services:
       - DB_NAME=mixi_shop
     volumes:
       - ./honeypot.log:/var/www/honeypot_access.log
-      - ./uploads:/var/www/uploads  # Ánh xạ thư mục uploads ra ngoài
-      - ./src:/var/www/html        # Thư mục code
     networks:
       - mixi_network
 
