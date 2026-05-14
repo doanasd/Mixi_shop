@@ -10,16 +10,28 @@ if (!isset($_SESSION['username'])) {
 }
 
 // Lấy thông tin user
-// Nếu có tham số GET 'user' (IDOR vulnerability potential) thì lấy theo đó, nếu không lấy của chính mình
 if (isset($_GET['user'])) {
     $name = $_GET['user'];
-    $row = profile($name); // Cần đảm bảo hàm profile() trong database.php lấy theo username
+    
+    // ------ KỊCH BẢN IDOR CHO ĐỒ ÁN ------
+    // Nếu user đang đăng nhập cố tình gọi thông tin của một user khác
+    if ($name !== $_SESSION['username']) {
+        // Ghi log vào file honeypot_access.log (file này bạn đã map ra ngoài Docker)
+        $client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
+        $log_message = date('[Y-m-d H:i:s]') . " [IDOR_ALERT] User '{$_SESSION['username']}' cố tình truy cập trái phép profile của user '{$name}' từ IP: {$client_ip}\n";
+        
+        // Ghi nối (append) vào file log
+        error_log($log_message, 3, "/var/www/honeypot_access.log");
+    }
+    // -------------------------------------
+    
+    $row = profile($name);
 } else {
     $name = $_SESSION['username'];
     $row = profile($name);
 }
 
-// SỬA DÒNG NÀY: Dùng proxy script avatar.php để gọi ảnh thay vì gọi trực tiếp thư mục
+// Dùng proxy script avatar.php để gọi ảnh 
 $avatar_path = !empty($row['avatars']) ? "avatar.php?img=" . urlencode($row['avatars']) : "img/download.jfif";
 ?>
 
