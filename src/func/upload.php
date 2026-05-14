@@ -6,10 +6,11 @@ include "database.php";
 $targer_dir = "/var/www/uploads/";
 
 if (!file_exists($targer_dir)) {
-    mkdir($targer_dir, 0777, true);
+    // SỬA LỖI B: Đổi phân quyền từ 0777 (nguy hiểm) thành 0755 (an toàn)
+    mkdir($targer_dir, 0755, true);
 }
 
-// Gợi ý sửa trong upload.php
+// SỬA LỖI A: Thêm timestamp (thời gian) vào trước tên file để chống ghi đè
 $filename = time() . "_" . basename($_FILES["fileupload"]["name"]);
 $target_file = $targer_dir . $filename;
 $uploadOk = 1;
@@ -20,8 +21,8 @@ if ($_FILES["fileupload"]["size"] > 5000000) {
     $uploadOk = 0;
 }
 
-// 2. MỞ KHÓA TÍNH NĂNG KIỂM TRA ĐUÔI FILE (Defense-in-Depth)
-$allowed_types = array('jpg', 'png', 'jpeg', 'gif', 'jfif'); // Đã thêm jfif theo thực tế của bạn
+// 2. Kiểm tra đuôi file (Defense-in-Depth)
+$allowed_types = array('jpg', 'png', 'jpeg', 'gif', 'jfif');
 if (!in_array($fileType, $allowed_types)) {
     echo "<script>alert('Chỉ được upload file ảnh!'); window.location.href='../profile.php';</script>";
     $uploadOk = 0;
@@ -30,9 +31,9 @@ if (!in_array($fileType, $allowed_types)) {
 if ($uploadOk == 0) {
     echo "<script>alert('Upload thất bại!'); window.location.href='../profile.php';</script>";
 } else {
-    // 3. Logic lưu DB vẫn giữ nguyên (Chỉ lưu tên file, không lưu đường dẫn)
+    // 3. Thực hiện lưu file
     if (move_uploaded_file($_FILES["fileupload"]["tmp_name"], $target_file)) {
-        $filename = basename($_FILES["fileupload"]["name"]);
+        // Lưu tên file MỚI (đã có timestamp) vào database
         upload($_SESSION['username'], $filename);
         
         echo "<script>
