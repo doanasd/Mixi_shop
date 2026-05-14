@@ -9,7 +9,9 @@ if (!file_exists($targer_dir)) {
     mkdir($targer_dir, 0777, true);
 }
 
-$target_file = $targer_dir . basename($_FILES["fileupload"]["name"]);
+// Gợi ý sửa trong upload.php
+$filename = time() . "_" . basename($_FILES["fileupload"]["name"]);
+$target_file = $targer_dir . $filename;
 $uploadOk = 1;
 $fileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
