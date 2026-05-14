@@ -19,8 +19,8 @@ if (isset($_GET['user'])) {
     $row = profile($name);
 }
 
-// Xử lý ảnh đại diện mặc định nếu chưa có
-$avatar_path = !empty($row['avatars']) ? "./uploads/" . $row['avatars'] : "img/download.jfif";
+// SỬA DÒNG NÀY: Dùng proxy script avatar.php để gọi ảnh thay vì gọi trực tiếp thư mục
+$avatar_path = !empty($row['avatars']) ? "avatar.php?img=" . urlencode($row['avatars']) : "img/download.jfif";
 ?>
 
 <main style="padding: 50px 0;">
