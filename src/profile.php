@@ -20,7 +20,10 @@ if (isset($_GET['user'])) {
     // Nếu user đang đăng nhập cố tình gọi thông tin của một user khác
     if ($name !== $_SESSION['username']) {
         // Ghi log vào file honeypot_access.log
-        $client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
+        // SỬA THÀNH ĐOẠN NÀY (Bóc tách IP thật):
+        $raw_ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
+        $ip_array = explode(',', $raw_ip); // Cắt chuỗi theo dấu phẩy
+        $client_ip = trim($ip_array[0]);   // Lấy IP đầu tiên và xóa khoảng trắng thừa
         
         // Dùng đúng từ khóa IDOR_ATTACK để Rule 100210 của Wazuh tóm được
         $log_message = date('[Y-m-d H:i:s]') . " IDOR_ATTACK: User '{$_SESSION['username']}' cố tình truy cập trái phép profile của user '{$name}' từ IP: {$client_ip}\n";
