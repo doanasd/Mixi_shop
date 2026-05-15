@@ -13,15 +13,23 @@ if (!isset($_SESSION['username'])) {
 if (isset($_GET['user'])) {
     $name = $_GET['user'];
     
-    // ------ KỊCH BẢN IDOR CHO ĐỒ ÁN ------
+// ------ KỊCH BẢN IDOR CHO ĐỒ ÁN ------
     // Nếu user đang đăng nhập cố tình gọi thông tin của một user khác
     if ($name !== $_SESSION['username']) {
-        // Ghi log vào file honeypot_access.log (file này bạn đã map ra ngoài Docker)
+        // Ghi log vào file honeypot_access.log
         $client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
-        $log_message = date('[Y-m-d H:i:s]') . " [IDOR_ALERT] User '{$_SESSION['username']}' cố tình truy cập trái phép profile của user '{$name}' từ IP: {$client_ip}\n";
+        
+        // SỬA IDOR_ALERT thành IDOR_ATTACK ĐỂ WAZUH NHẬN DIỆN ĐƯỢC
+        $log_message = date('[Y-m-d H:i:s]') . " IDOR_ATTACK: User '{$_SESSION['username']}' cố tình truy cập trái phép profile của '{$name}' từ IP: {$client_ip}\n";
         
         // Ghi nối (append) vào file log
         error_log($log_message, 3, "/var/www/honeypot_access.log");
+        
+        // CHẶN ĐỨNG: Không cho load tiếp giao diện, báo lỗi 403
+        header("HTTP/1.0 403 Forbidden");
+        echo "<h1 style='color:red; text-align:center; margin-top:50px;'>⛔ PHÁT HIỆN HÀNH VI TRUY CẬP TRÁI PHÉP!</h1>";
+        echo "<p style='text-align:center;'>IP của bạn ($client_ip) đã bị hệ thống SOC ghi nhận.</p>";
+        exit; // Dừng toàn bộ trang web ngay lập tức
     }
     // -------------------------------------
     
