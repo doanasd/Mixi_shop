@@ -1,35 +1,38 @@
 <?php 
-// Header đã có session_start()
-include "./page/header.php";
+// 1. BẮT ĐẦU SESSION ĐỂ KIỂM TRA ĐĂNG NHẬP VÀ PHÂN QUYỀN TRƯỚC TIÊN
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once "./func/database.php";
 
-// Kiểm tra đăng nhập
+// 2. KIỂM TRA ĐĂNG NHẬP (Chuyển hướng bằng Header mượt hơn dùng Script)
 if (!isset($_SESSION['username'])) {
-    echo "<script>window.location.href='login.php';</script>";
+    header("Location: login.php");
     exit;
 }
 
-// Lấy thông tin user
+// 3. LẤY THÔNG TIN VÀ KIỂM TRA LỖ HỔNG IDOR (TRƯỚC KHI IN HTML RA MÀN HÌNH)
 if (isset($_GET['user'])) {
     $name = $_GET['user'];
     
-// ------ KỊCH BẢN IDOR CHO ĐỒ ÁN ------
+    // ------ KỊCH BẢN IDOR CHO ĐỒ ÁN ------
     // Nếu user đang đăng nhập cố tình gọi thông tin của một user khác
     if ($name !== $_SESSION['username']) {
         // Ghi log vào file honeypot_access.log
         $client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
         
-        // SỬA IDOR_ALERT thành IDOR_ATTACK ĐỂ WAZUH NHẬN DIỆN ĐƯỢC
-        $log_message = date('[Y-m-d H:i:s]') . " IDOR_ATTACK: User '{$_SESSION['username']}' cố tình truy cập trái phép profile của '{$name}' từ IP: {$client_ip}\n";
+        // Dùng đúng từ khóa IDOR_ATTACK để Rule 100210 của Wazuh tóm được
+        $log_message = date('[Y-m-d H:i:s]') . " IDOR_ATTACK: User '{$_SESSION['username']}' cố tình truy cập trái phép profile của user '{$name}' từ IP: {$client_ip}\n";
         
         // Ghi nối (append) vào file log
         error_log($log_message, 3, "/var/www/honeypot_access.log");
         
-        // CHẶN ĐỨNG: Không cho load tiếp giao diện, báo lỗi 403
+        // CHẶN ĐỨNG: Lúc này Header chưa bị gửi nên hàm này sẽ chạy mượt mà
         header("HTTP/1.0 403 Forbidden");
         echo "<h1 style='color:red; text-align:center; margin-top:50px;'>⛔ PHÁT HIỆN HÀNH VI TRUY CẬP TRÁI PHÉP!</h1>";
         echo "<p style='text-align:center;'>IP của bạn ($client_ip) đã bị hệ thống SOC ghi nhận.</p>";
-        exit; // Dừng toàn bộ trang web ngay lập tức
+        exit; // Dừng toàn bộ trang web ngay lập tức, không load DB thêm
     }
     // -------------------------------------
     
@@ -39,8 +42,11 @@ if (isset($_GET['user'])) {
     $row = profile($name);
 }
 
-// Dùng proxy script avatar.php để gọi ảnh 
+// Dùng proxy script avatar.php để gọi ảnh an toàn
 $avatar_path = !empty($row['avatars']) ? "avatar.php?img=" . urlencode($row['avatars']) : "img/download.jfif";
+
+// 👉 4. SAU KHI VƯỢT QUA KIỂM TRA BẢO MẬT, MỚI BẮT ĐẦU VẼ GIAO DIỆN HTML
+include "./page/header.php";
 ?>
 
 <main style="padding: 50px 0;">
@@ -48,10 +54,10 @@ $avatar_path = !empty($row['avatars']) ? "avatar.php?img=" . urlencode($row['ava
         
         <div style="width: 30%; text-align: center;">
             <div style="width: 200px; height: 200px; margin: 0 auto 20px; overflow: hidden; border-radius: 50%; border: 5px solid #eee;">
-                <img src="<?php echo $avatar_path; ?>" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                <img src="<?php echo htmlspecialchars($avatar_path); ?>" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
             </div>
             
-            <h2 style="margin-bottom: 20px; color: #BD0000;"><?php echo $row['username']; ?></h2>
+            <h2 style="margin-bottom: 20px; color: #BD0000;"><?php echo htmlspecialchars($row['username']); ?></h2>
 
             <form action="./func/upload.php" method="post" enctype="multipart/form-data" style="background: #f9f9f9; padding: 15px; border-radius: 5px;">
                 <label style="display: block; margin-bottom: 10px; font-weight: bold; color: #555;">Đổi ảnh đại diện:</label>
@@ -66,26 +72,26 @@ $avatar_path = !empty($row['avatars']) ? "avatar.php?img=" . urlencode($row['ava
             <h3 style="border-bottom: 2px solid #BD0000; padding-bottom: 10px; margin-bottom: 25px; color: #333;">Thông tin cá nhân</h3>
             
             <form action="./admin/update.php" method="post">
-                <input type="hidden" name="username" value="<?php echo $row['username']; ?>">
+                <input type="hidden" name="username" value="<?php echo htmlspecialchars($row['username']); ?>">
 
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; margin-bottom: 5px; font-weight: bold;">Họ và tên:</label>
-                    <input type="text" name="fullname" value="<?php echo $row['fullname']; ?>" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    <input type="text" name="fullname" value="<?php echo htmlspecialchars($row['fullname']); ?>" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
                 </div>
 
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; margin-bottom: 5px; font-weight: bold;">Số điện thoại:</label>
-                    <input type="text" name="phone" value="<?php echo $row['phone']; ?>" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    <input type="text" name="phone" value="<?php echo htmlspecialchars($row['phone']); ?>" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
                 </div>
 
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; margin-bottom: 5px; font-weight: bold;">Email:</label>
-                    <input type="email" name="email" value="<?php echo $row['email']; ?>" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    <input type="email" name="email" value="<?php echo htmlspecialchars($row['email']); ?>" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
                 </div>
 
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; margin-bottom: 5px; font-weight: bold;">Địa chỉ:</label>
-                    <input type="text" name="location" value="<?php echo $row['location']; ?>" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    <input type="text" name="location" value="<?php echo htmlspecialchars($row['location']); ?>" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
                 </div>
 
                 <div style="margin-top: 30px; display: flex; gap: 15px;">
